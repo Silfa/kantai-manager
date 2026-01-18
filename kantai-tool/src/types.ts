@@ -10,6 +10,7 @@ export interface RawShip {
 export interface ShipMasterData {
   name: string;
   stype: number;
+  sortId?: number;
 }
 
 export interface ApiMstShip {
@@ -17,6 +18,7 @@ export interface ApiMstShip {
   api_name: string;
   api_stype: number;
   api_sortno?: number;
+  api_sort_id?: number;
 }
 
 export interface ApiMstStype {

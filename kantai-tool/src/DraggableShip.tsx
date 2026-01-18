@@ -47,7 +47,7 @@ export const ShipItem = forwardRef<HTMLDivElement, ShipItemProps>(
                <div>雷装:{s.api_raisou ? s.api_raisou[0] : '?'}</div>
                <div>対空:{s.api_taiku ? s.api_taiku[0] : '?'}</div>
                <div>装甲:{s.api_soukou ? s.api_soukou[0] : '?'}</div>
-               <div>耐久:{s.api_maxhp && Array.isArray(s.api_maxhp) ? s.api_maxhp[1] : '?'}</div>
+               <div>耐久:{s.api_maxhp ? s.api_maxhp : '?'}</div>
                <div>運:{s.api_lucky ? s.api_lucky[0] : '?'}</div>
             </div>
           </div>

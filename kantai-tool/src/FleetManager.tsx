@@ -26,6 +26,13 @@ interface BonusGroup {
   shipIds: number[];
 }
 
+const generateUUID = () => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return Date.now().toString(36) + Math.random().toString(36).substring(2);
+};
+
 function BonusDropArea({ id, children }: { id: string; children: React.ReactNode }) {
   const { setNodeRef, isOver } = useDroppable({ id });
   return (
@@ -89,6 +96,7 @@ export default function FleetManager({
           shipMap[ship.api_id] = {
             name: ship.api_name,
             stype: ship.api_stype,
+            sortId: ship.api_sort_id
           };
         });
 
@@ -307,11 +315,11 @@ export default function FleetManager({
         const json = JSON.parse(event.target?.result as string);
         if (Array.isArray(json)) {
           const groups = json.map((item: any) => ({
-            id: crypto.randomUUID(),
+            id: generateUUID(),
             text: item.text || "",
             shipIds: Array.isArray(item.ids) ? item.ids : []
           }));
-          setBonusGroups(groups.length > 0 ? groups : [{ id: crypto.randomUUID(), text: "", shipIds: [] }]);
+          setBonusGroups(groups.length > 0 ? groups : [{ id: generateUUID(), text: "", shipIds: [] }]);
         }
       } catch (err) {
         console.error(err);
@@ -398,7 +406,7 @@ export default function FleetManager({
         const json = JSON.parse(event.target?.result as string);
         if (Array.isArray(json)) {
           const groups = json.map((item: any) => ({
-            id: crypto.randomUUID(),
+            id: generateUUID(),
             text: item.text || "",
             shipIds: Array.isArray(item.ids) ? item.ids : []
           }));
@@ -488,7 +496,10 @@ export default function FleetManager({
       return stypeA - stypeB || b.api_lv - a.api_lv; // 艦種ID昇順 -> レベル降順
     }
     // id (図鑑No順)
-    return a.api_ship_id - b.api_ship_id;
+    const sortA = shipMaster[String(a.api_ship_id)]?.sortId || a.api_ship_id;
+    const sortB = shipMaster[String(b.api_ship_id)]?.sortId || b.api_ship_id;
+    return sortA - sortB;
+
   });
 
   // フィルター済みマスター艦娘（特効作成モード用）
@@ -497,7 +508,11 @@ export default function FleetManager({
     if (ship.api_id > 1500) return false;
     const stypeName = stypeMaster[String(ship.api_stype)];
     return selectedStype === null || stypeName === selectedStype;
-  }).sort((a, b) => a.api_sortno && b.api_sortno ? a.api_sortno - b.api_sortno : a.api_id - b.api_id);
+  }).sort((a, b) => {
+    const sortA = a.api_sort_id || a.api_id;
+    const sortB = b.api_sort_id || b.api_id;
+    return sortA - sortB;
+  });
 
   // 所持している艦娘に含まれる艦種IDのリスト（ID順でソートしてから名前でユニーク化）
   const availableStypeIds = Array.from(new Set(ships.map(s => {
@@ -611,6 +626,7 @@ export default function FleetManager({
                     shipMaster={shipMaster}
                     stypeMaster={stypeMaster}
                     detailMode={false}
+                    bonusText={`No.${ship.api_sort_id}`}
                   />
                 ))}
               </div>
@@ -634,7 +650,7 @@ export default function FleetManager({
                     <input type="file" accept=".json" onChange={handleImportBonus} style={{ display: 'none' }} />
                   </label>
                   <button onClick={handleDownloadBonus}>💾 DL</button>
-                  <button onClick={() => setBonusGroups([...bonusGroups, { id: crypto.randomUUID(), text: "", shipIds: [] }])}>＋ 追加</button>
+                  <button onClick={() => setBonusGroups([...bonusGroups, { id: generateUUID(), text: "", shipIds: [] }])}>＋ 追加</button>
                   <button onClick={handleSaveBonus}>☁️ 保存</button>
                 </div>
               </div>
@@ -653,7 +669,11 @@ export default function FleetManager({
                       }}
                       style={{ flex: 1, padding: "4px" }}
                     />
-                    <button onClick={() => setBonusGroups(bonusGroups.filter((_, i) => i !== index))} style={{ color: "red" }}>削除</button>
+                    <button onClick={() => {
+                      if (window.confirm("この特効グループを削除しますか？")) {
+                        setBonusGroups(bonusGroups.filter((_, i) => i !== index));
+                      }
+                    }} style={{ color: "red" }}>削除</button>
                   </div>
                   <BonusDropArea id={`bonus-group-${group.id}`}>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
