@@ -50,12 +50,17 @@ pm2 start server.js --name "kanmusu-api"
 
 ## APIエンドポイント
 
-APIは以下の主要なリソースを提供します:
+APIは以下の主要なリソースを提供します。多くのエンドポイントで `x-user-token` ヘッダーによる認証（ユーザー名）が必要です。
 
-*   `/api/login`: 簡易ログイン（ユーザー名の検証）。
-*   `/api/ships`: 所持艦娘データの取得・保存。
-*   `/api/decks`: 艦隊編成データの取得・保存。
-*   `/api/bonus`: 特効データの取得・保存。
+*   **認証**:
+    *   `POST /api/login`: 簡易ログイン（ユーザー名の検証）。
+*   **ユーザーデータ**:
+    *   `GET/POST /api/ships`: 所持艦娘データの取得・保存。
+    *   `GET/POST /api/decks`: 艦隊編成データの取得・保存。
+    *   `GET/POST /api/bonus`: 特効グループデータの取得・保存。
+*   **設定・マスターデータ**:
+    *   `GET/POST /api/master`: ゲームのマスターデータ (`api_mst_ship`, `api_mst_stype`) の取得・保存。
+    *   `GET/POST /api/stype_config`: 艦種フィルタリング設定の取得・保存。
 
 データは `data/` ディレクトリ内のJSONファイルとして保存されます。
 
