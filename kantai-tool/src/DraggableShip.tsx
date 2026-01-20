@@ -77,13 +77,11 @@ export function DraggableShip({ ship, shipMaster, stypeMaster, id, detailMode, i
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: id,
     data: { ship }, // 艦娘オブジェクトそのものを渡す
-    disabled: isUsed // 編成済みの場合はドラッグ不可
   });
 
   const style: React.CSSProperties = {
     opacity: isDragging ? 0.3 : (isUsed ? 0.5 : 1), // 使用中は半透明
     filter: isUsed ? 'grayscale(100%)' : undefined, // 使用中はグレーアウト
-    cursor: isUsed ? 'not-allowed' : undefined, // カーソル変更
   };
 
   const info = shipMaster[String(ship.api_ship_id)];
